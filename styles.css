@@ -36,22 +36,16 @@ h1 {
 .estrela {
     z-index: 5;
 
-
     animation-fill-mode: forwards;
 
+
+
 }
 
-.queda-1 {
-    animation: queda-1 1s ease-in-out;
-}
 
-.queda-2 {
-    animation: queda-2 1s ease-in-out;
-}
 
-.queda-3 {
-    animation: queda-3 1s ease-in-out;
-}
+
+
 
 
 

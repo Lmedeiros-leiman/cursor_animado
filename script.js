@@ -49,12 +49,27 @@ function criarEstrela()
     return estrela // retorna o ponteiro para o objeto estrela.
 }
 
+function calcularDistanciaPontos(atual, antiga = lastPosition)
+{ // não gosto muito dessa solução, mas não to a fim de cava o código fonte do godot para achar uma versão rápida desse código.
+    return Math.sqrt(Math.pow(atual.X - antiga.X, 2) + Math.pow(atual.Y - antiga.Y, 2));
+}
 //
 // Código Principal
 //
+
+let lastPosition = { "X": 0, "Y": 0 };
+
 document.onmousemove = (e) => 
 {
+
     let CursorCurrentPosition = { "X": e.clientX, "Y": e.clientY };
+
+    if (calcularDistanciaPontos(CursorCurrentPosition) < 60)
+    {
+        return
+    }
+
+
     let Estrela = criarEstrela();
 
     const AnimacaoAleatoria = () =>
@@ -74,16 +89,18 @@ document.onmousemove = (e) =>
         return cores[Math.floor(Math.random() * cores.length)]
     }
 
+    // configura a estrela
     Estrela.style.color = CorAleatoria();
+    Estrela.style.animation = AnimacaoAleatoria() + " 1.5s ease-in-out"
+    Estrela.classList.add("estrela", "absoluta");
 
-    Estrela.classList.add("estrela", "absoluta", AnimacaoAleatoria());
-
+    // move a estrela.
     Estrela.style.top = CursorCurrentPosition.Y + "px";
     Estrela.style.left = CursorCurrentPosition.X + "px";
 
 
     appendElement(Estrela, 1000)
 
-
+    lastPosition = CursorCurrentPosition
 
 }
