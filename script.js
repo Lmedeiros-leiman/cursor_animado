@@ -63,6 +63,19 @@ document.onmousemove = (e) =>
         return animacoes[Math.floor(Math.random() * animacoes.length)]
     }
 
+    const CorAleatoria = () =>
+    {
+        const cores = [ // abaixo
+            "rgba(142, 216, 199, 1)",
+            "rgba(168, 198, 228, 1)",
+            "rgba(195, 163, 200, 1)",
+            "rgba(213, 194, 141, 1)",
+            "rgba(175, 218, 183, 1)"]
+        return cores[Math.floor(Math.random() * cores.length)]
+    }
+
+    Estrela.style.color = CorAleatoria();
+
     Estrela.classList.add("estrela", "absoluta", AnimacaoAleatoria());
 
     Estrela.style.top = CursorCurrentPosition.Y + "px";
