@@ -42,10 +42,24 @@ h1 {
 
 }
 
+.brilho {
+    position: absolute;
+    box-shadow: 0rem 0rem 1.2rem 0.6rem rgb(75, 133, 221);
+
+    animation: brilho 1s ease-in-out;
+    animation-fill-mode: forwards;
+}
 
 
+@keyframes brilho {
+    0% {
+        opacity: 1;
+    }
 
-
+    100% {
+        opacity: 0;
+    }
+}
 
 
 
