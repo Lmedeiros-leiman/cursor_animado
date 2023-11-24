@@ -9,11 +9,14 @@ const configuration = {
     MaximumGlowDistance: 10,
 
     // estrela
+    MininumTimeBetweenStars: 250, // MilliSeconds
     StarDistance: 200,
     StarColors: ["(142, 216, 199)", "(168, 198, 228)", "(195, 163, 200)", "(213, 194, 141)", "(175, 218, 183)"],
     StarSizes: ["1.4rem", "1rem", "0.6rem"],
     StarAnimations: ["queda-1", "queda-2", "queda-3"]
 }
+
+const now = new Date().getTime();
 
 const originPosition = { "X": 0, "Y": 0 };
 let CursorCurrentPosition, CursorLastPosition = { "X": 0, "Y": 0 };
@@ -110,7 +113,7 @@ function CriarTrilhaBrilho(atual = CursorCurrentPosition, antiga = CursorLastPos
         }
         CriarBrilho(posicao)
     });
-    CursorLastPosition = CursorCurrentPosition
+
 
 
 }
@@ -133,7 +136,19 @@ function MoverElemento(elemento, posicao = CursorCurrentPosition)
     elemento.style.top = posicao.Y + "px";
     elemento.style.left = posicao.X + "px";
 }
-
+// funções de ajuste.
+function CursorUpdateLastPosition(position = CursorCurrentPosition)
+{
+    CursorLastPosition = position;
+}
+function CursorAdjustLastPostion() 
+{
+    const antiga = CursorLastPosition;
+    if (antiga.X === 0 && antiga.Y === 0)
+    {
+        CursorLastPosition = CursorCurrentPosition;
+    }
+}
 //
 // Código Principal
 //
@@ -143,15 +158,14 @@ window.onpointermove = (e) =>
 {
     CursorCurrentPosition = { "X": e.clientX, "Y": e.clientY };
     //
+    CursorAdjustLastPostion();
 
     CriarTrilhaBrilho();
-
-    if (CalcularDistanciaPontos(CursorCurrentPosition) < configuration.StarDistance) { return }
-    //
     CriarEstrela();
-    CursorLastPosition = CursorCurrentPosition
 
-
+    CursorUpdateLastPosition();
 
 
 }
+// essa linha permite ajustar o código, caso detecte que a coordenada é a de origem, pede para ajustar as coordenadas.
+document.body.onmouseleave = () => CursorUpdateLastPosition(originPosition);
