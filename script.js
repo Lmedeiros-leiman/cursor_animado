@@ -16,10 +16,10 @@ const configuration = {
     StarAnimations: ["queda-1", "queda-2", "queda-3"]
 }
 
-const now = new Date().getTime();
+let TempoAntigo = new Date().getTime();
 
 const originPosition = { "X": 0, "Y": 0 };
-let CursorCurrentPosition, CursorLastPosition = { "X": 0, "Y": 0 };
+let CursorCurrentPosition, LastStarPosition, CursorLastPosition = originPosition;
 
 //
 // Funções
@@ -38,10 +38,39 @@ function AppendElement(elemento, tempo = 1000)
     }, tempo);
 
 }
-function CriarEstrela()
+function CalcularTempo(atual, antigo)
 {
-    let Estrela = CriarCaractereEstrela();
+    return atual - antigo;
+}
+function CriarEstrela(atual, antiga)
+{
+    let distancia = CalcularDistanciaPontos(atual, antiga)
 
+    const Agora = new Date().getTime(),
+        MovimentouSuficiente = CalcularDistanciaPontos(atual, antiga) >= configuration.MininumTimeBetweenStars && antiga != undefined, /* bug bizarro, mas estou cansado para descobrir agora. */
+        PassouTempoSuficiente = CalcularTempo(Agora, TempoAntigo) > configuration.MininumTimeBetweenStars;
+
+
+    console.log(CalcularTempo(Agora, TempoAntigo))
+    if (!(MovimentouSuficiente || PassouTempoSuficiente))
+    {
+
+        return;
+    }
+
+    // cria e configura a estrela.
+    let Estrela = CriarCaractereEstrela();
+    ConfigurarEstrela(Estrela);
+    // move a estrela.
+    MoverElemento(Estrela)
+    AppendElement(Estrela, 1000)
+
+    // reinicia variaveis.
+    TempoAntigo = Agora;
+    LastStarPosition = CursorCurrentPosition;
+}
+function ConfigurarEstrela(Estrela)
+{
     const AnimacaoAleatoria = () =>
     {
         const animacoes = configuration.StarAnimations;
@@ -58,10 +87,6 @@ function CriarEstrela()
     Estrela.style.color = "rgb" + CorAleatoria();
     Estrela.style.animation = AnimacaoAleatoria() + " 1.5s ease-in-out"
     Estrela.classList.add("estrela", "absoluta");
-
-    // move a estrela.
-    MoverElemento(Estrela)
-    AppendElement(Estrela, 1000)
 }
 function CriarCaractereEstrela()
 {
@@ -136,7 +161,7 @@ function MoverElemento(elemento, posicao = CursorCurrentPosition)
     elemento.style.top = posicao.Y + "px";
     elemento.style.left = posicao.X + "px";
 }
-// funções de ajuste.
+// funções de ajuste de coordenada.
 function CursorUpdateLastPosition(position = CursorCurrentPosition)
 {
     CursorLastPosition = position;
@@ -157,11 +182,13 @@ function CursorAdjustLastPostion()
 window.onpointermove = (e) => 
 {
     CursorCurrentPosition = { "X": e.clientX, "Y": e.clientY };
-    //
+    // verificamos e atualizamos variaveis.
     CursorAdjustLastPostion();
 
+
+    // criamos os elementos
     CriarTrilhaBrilho();
-    CriarEstrela();
+    CriarEstrela(CursorCurrentPosition, LastStarPosition);
 
     CursorUpdateLastPosition();
 
