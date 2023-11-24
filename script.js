@@ -2,15 +2,29 @@
 // Variaveis
 //
 
-const DocumentBody = document.querySelector("body");
+
+const configuration = {
+    // brilho
+    GlowDuration: 75,
+    MaximumGlowDistance: 10,
+
+    // estrela
+    StarDistance: 200,
+    StarColors: ["(142, 216, 199)", "(168, 198, 228)", "(195, 163, 200)", "(213, 194, 141)", "(175, 218, 183)"],
+    StarSizes: ["1.4rem", "1rem", "0.6rem"],
+    StarAnimations: ["queda-1", "queda-2", "queda-3"]
+}
+
+const originPosition = { "X": 0, "Y": 0 };
 let CursorCurrentPosition, CursorLastPosition = { "X": 0, "Y": 0 };
 
 //
 // Funções
 // essas são chamadas pelo código principal.
+// eu queria separar tudo em classes, mas não to a fim de usar um webpacker.
 //
 
-function appendElement(elemento, tempo = 1000)
+function AppendElement(elemento, tempo = 1000)
 {
 
     document.body.appendChild(elemento);
@@ -21,38 +35,32 @@ function appendElement(elemento, tempo = 1000)
     }, tempo);
 
 }
-
-function criarEstrela()
+function CriarEstrela()
 {
-    let Estrela = criarCaractereEstrela();
+    let Estrela = CriarCaractereEstrela();
 
     const AnimacaoAleatoria = () =>
     {
-        const animacoes = ["queda-1", "queda-2", "queda-3"];
+        const animacoes = configuration.StarAnimations;
         return animacoes[Math.floor(Math.random() * animacoes.length)]
     }
 
     const CorAleatoria = () =>
     {
-        const cores = [ // abaixo
-            "rgba(142, 216, 199, 1)",
-            "rgba(168, 198, 228, 1)",
-            "rgba(195, 163, 200, 1)",
-            "rgba(213, 194, 141, 1)",
-            "rgba(175, 218, 183, 1)"]
+        const cores = configuration.StarColors;
         return cores[Math.floor(Math.random() * cores.length)]
     }
 
     // configura a estrela
-    Estrela.style.color = CorAleatoria();
+    Estrela.style.color = "rgb" + CorAleatoria();
     Estrela.style.animation = AnimacaoAleatoria() + " 1.5s ease-in-out"
     Estrela.classList.add("estrela", "absoluta");
 
     // move a estrela.
-    moverElemento(Estrela)
-    appendElement(Estrela, 1000)
+    MoverElemento(Estrela)
+    AppendElement(Estrela, 1000)
 }
-function criarCaractereEstrela()
+function CriarCaractereEstrela()
 {
     // não queria depender de livrarias de terceiro.
     let estrela = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -78,22 +86,49 @@ function criarCaractereEstrela()
 
     return estrela // retorna o ponteiro para o objeto estrela.
 }
-function criarBrilho()
+function CriarTrilhaBrilho(atual = CursorCurrentPosition, antiga = CursorLastPosition)
+{
+
+    const MaximumGlowDistance = configuration.MaximumGlowDistance;
+
+    const PointsDistance = CalcularDistanciaPontos();
+    const PointsQuantity = Math.max(Math.floor(PointsDistance / MaximumGlowDistance), 1);
+
+    const DeltaPositions = {
+        "X": (atual.X - antiga.X) / PointsQuantity,
+        "Y": (atual.Y - antiga.Y) / PointsQuantity,
+    };
+
+    // beleza, aqui criamos um array com o tamanho da quantidade de pontos.
+    // cada entrada representa um ponto.
+    // então só colocamos os pontos :)
+    Array.from(Array(PointsQuantity)).forEach((_, index) =>
+    {
+        const posicao = {
+            "X": (antiga.X + DeltaPositions.X * index),
+            "Y": (antiga.Y + DeltaPositions.Y * index)
+        }
+        CriarBrilho(posicao)
+    });
+    CursorLastPosition = CursorCurrentPosition
+
+
+}
+function CriarBrilho(posicao)
 {
     let Brilho = document.createElement("div");
 
     Brilho.classList.add("brilho")
 
+    MoverElemento(Brilho, posicao)
+    AppendElement(Brilho, configuration.GlowDuration)
 
-    moverElemento(Brilho)
-    appendElement(Brilho, 1500)
 }
-
-function calcularDistanciaPontos(atual, antiga = CursorLastPosition)
+function CalcularDistanciaPontos(atual = CursorCurrentPosition, antiga = CursorLastPosition)
 { // não gosto muito dessa solução, mas não to a fim de cava o código fonte do godot para achar uma versão rápida desse código.
     return Math.sqrt(Math.pow(atual.X - antiga.X, 2) + Math.pow(atual.Y - antiga.Y, 2));
 }
-function moverElemento(elemento, posicao = CursorCurrentPosition)
+function MoverElemento(elemento, posicao = CursorCurrentPosition)
 {
     elemento.style.top = posicao.Y + "px";
     elemento.style.left = posicao.X + "px";
@@ -104,23 +139,19 @@ function moverElemento(elemento, posicao = CursorCurrentPosition)
 //
 
 
-
-document.onmousemove = (e) => 
+window.onpointermove = (e) => 
 {
     CursorCurrentPosition = { "X": e.clientX, "Y": e.clientY };
     //
 
-    criarBrilho();
+    CriarTrilhaBrilho();
 
-    if (calcularDistanciaPontos(CursorCurrentPosition) < 60) { return }
+    if (CalcularDistanciaPontos(CursorCurrentPosition) < configuration.StarDistance) { return }
     //
-    criarEstrela();
-
-
-    // criamos as estrelinhas.
-
-
-
+    CriarEstrela();
     CursorLastPosition = CursorCurrentPosition
+
+
+
 
 }
